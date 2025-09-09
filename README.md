@@ -425,6 +425,3 @@ uv run python -m prompt_xml_strategies.cli execute-pipeline \
 4. Add type hints for all functions
 5. Update documentation when adding new strategies
 
-## License
-
-MIT License - see LICENSE file for details.
