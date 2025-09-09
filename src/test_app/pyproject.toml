@@ -1,0 +1,146 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "prompt-xml-strategies-test-app"
+version = "0.1.0"
+description = "Demo application for SampleStrategyPipeline functionality"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "PromptXML Strategies Team", email = "team@promptxmlstrategies.dev"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Markup :: XML",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    # Core dependencies that the parent project provides
+    "jsonschema>=4.0.0",
+    "pydantic>=2.0.0",
+    "jinja2>=3.0.0",
+    "lxml>=4.0.0",
+    "xmlschema>=2.0.0",
+    "requests>=2.25.0",
+    "anthropic>=0.3.0",
+    "click>=8.0.0",
+    "rich>=10.0.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+demo-mock = "mock_demo_app:main"
+demo-real = "demo_app:main"
+demo-runner = "run_demo:main"
+demo-event-timeline = "event_timeline_demo:main"
+demo-question-answer = "question_answer_demo:main"
+demo-question-answer-response = "question_answer_response_demo:main"
+demo-question-answer-xml = "question_answer_xml_output_demo:main"
+demo-qa-strategy-pipeline = "qa_strategy_pipeline_demo:main"
+
+[project.urls]
+Homepage = "https://github.com/promptxmlstrategies/prompt-xml-strategies"
+Documentation = "https://promptxmlstrategies.readthedocs.io"
+Repository = "https://github.com/promptxmlstrategies/prompt-xml-strategies.git"
+Issues = "https://github.com/promptxmlstrategies/prompt-xml-strategies/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "*.py",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["test_app"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/.*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://prompt-xml-strategies.dev/schemas/prompts/conversational/question-answer.json",
+  "title": "Conversational Question-Answer Prompt Schema",
+  "description": "Schema for conversational Q&A prompts with optional context and history",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "The main question to ask",
+      "minLength": 1
+    },
+    "user_input": {
+      "type": "string", 
+      "description": "Alternative user input field",
+      "minLength": 1
+    },
+    "system_message": {
+      "type": "string",
+      "description": "System message to set context or behavior"
+    },
+    "conversation_history": {
+      "type": "array",
+      "description": "Previous messages in the conversation",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["user", "assistant", "system"]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["role", "content"]
+      }
+    },
+    "additional_context": {
+      "type": "string",
+      "description": "Additional context information"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of the user"
+    },
+    "assistant_name": {
+      "type": "string", 
+      "description": "Name of the assistant"
+    }
+  },
+  "anyOf": [
+    {"required": ["question"]},
+    {"required": ["user_input"]},
+    {"required": ["conversation_history"]}
+  ]
+}

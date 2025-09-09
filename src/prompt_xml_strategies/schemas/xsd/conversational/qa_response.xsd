@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://prompt-xml-strategies.dev/schemas/xsd/conversational"
+           xmlns:tns="https://prompt-xml-strategies.dev/schemas/xsd/conversational"
+           elementFormDefault="qualified">
+
+  <xs:element name="qa_response" type="tns:QAResponseType"/>
+
+  <xs:complexType name="QAResponseType">
+    <xs:sequence>
+      <xs:element name="answer" type="xs:string"/>
+      <xs:element name="confidence" type="tns:ConfidenceType" minOccurs="0"/>
+      <xs:element name="sources" type="tns:SourcesType" minOccurs="0"/>
+      <xs:element name="follow_up_questions" type="tns:FollowUpQuestionsType" minOccurs="0"/>
+      <xs:element name="explanation" type="xs:string" minOccurs="0"/>
+      <xs:element name="examples" type="tns:ExamplesType" minOccurs="0"/>
+      <xs:element name="difficulty_level" type="tns:DifficultyLevelType" minOccurs="0"/>
+      <xs:element name="tags" type="tns:TagsType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="ConfidenceType">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="SourcesType">
+    <xs:sequence>
+      <xs:element name="source" type="tns:SourceType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="SourceType">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string"/>
+      <xs:element name="url" type="xs:anyURI" minOccurs="0"/>
+      <xs:element name="type" type="tns:SourceTypeEnum" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="SourceTypeEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="web"/>
+      <xs:enumeration value="book"/>
+      <xs:enumeration value="paper"/>
+      <xs:enumeration value="documentation"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="FollowUpQuestionsType">
+    <xs:sequence>
+      <xs:element name="question" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExamplesType">
+    <xs:sequence>
+      <xs:element name="example" type="tns:ExampleType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ExampleType">
+    <xs:sequence>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="output" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="DifficultyLevelType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="beginner"/>
+      <xs:enumeration value="intermediate"/>
+      <xs:enumeration value="advanced"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="TagsType">
+    <xs:sequence>
+      <xs:element name="tag" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,71 @@
+
+{
+  "name": "Event Timeline Analysis",
+  "description": "Schema for analyzing event timelines with temporal relationships and actions",
+  "event_list": [
+    {
+      "id": "event_001",
+      "relative_time": "00:00:00",
+      "action": "System initialization started"
+    },
+    {
+      "id": "event_002", 
+      "relative_time": "00:00:15",
+      "action": "Database connection established"
+    },
+    {
+      "id": "event_003",
+      "relative_time": "00:00:30",
+      "action": "User authentication service loaded"
+    },
+    {
+      "id": "event_004",
+      "relative_time": "00:01:00",
+      "action": "API endpoints registered"
+    },
+    {
+      "id": "event_005",
+      "relative_time": "00:01:15",
+      "action": "Web server started on port 8080"
+    },
+    {
+      "id": "event_006",
+      "relative_time": "00:02:00",
+      "action": "Health check endpoint responding"
+    },
+    {
+      "id": "event_007",
+      "relative_time": "00:02:30",
+      "action": "First user request received"
+    },
+    {
+      "id": "event_008",
+      "relative_time": "00:03:00",
+      "action": "Cache warming process initiated"
+    },
+    {
+      "id": "event_009",
+      "relative_time": "00:03:45",
+      "action": "Background tasks scheduler activated"
+    },
+    {
+      "id": "event_010",
+      "relative_time": "00:04:00",
+      "action": "System fully operational"
+    }
+  ],
+  "events": {
+    "total_count": 10,
+    "time_span": "00:04:00",
+    "categories": {
+      "initialization": ["event_001", "event_002", "event_003"],
+      "service_startup": ["event_004", "event_005", "event_006"],
+      "operational": ["event_007", "event_008", "event_009", "event_010"]
+    },
+    "critical_path": ["event_001", "event_002", "event_003", "event_004", "event_005", "event_010"],
+    "parallel_events": [
+      ["event_002", "event_003"],
+      ["event_008", "event_009"]
+    ]
+  }
+}
