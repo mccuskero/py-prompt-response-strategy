@@ -9,7 +9,7 @@ A Python framework for creating structured prompts using JSON schemas with JSON-
 - **Interface-Based Design**: Extensible strategy system with clear separation of concerns
 - **JSON-to-XML Transformation**: Automatically convert structured LLM responses to validated XML documents
 - **CLI Interface**: Command-line tools for all major operations
-- **Multiple LLM Clients**: Support for OpenWebUI and Anthropic APIs
+- **Multiple LLM Clients**: Support for OpenWebUI, OLLAMA, and Anthropic APIs
 - **Comprehensive Testing**: pytest framework with >90% test coverage targets
 - **Modern Python**: Built with Python 3.11+, using uv package manager and pyproject.toml
 
@@ -34,12 +34,22 @@ pip install prompt-xml-strategies
 # List all available strategies (three-tier)
 uv run python -m prompt_xml_strategies.cli list-strategies
 
-# Execute complete three-tier pipeline
+# Execute complete three-tier pipeline with OpenWebUI
 uv run python -m prompt_xml_strategies.cli execute-pipeline \
   --prompt-strategy simple \
   --response-strategy simple \
   --xml-strategy simple \
   --llm-client openwebui \
+  --data data/input.json \
+  --output output.xml
+
+# Execute pipeline with OLLAMA
+uv run python -m prompt_xml_strategies.cli execute-pipeline \
+  --prompt-strategy simple \
+  --response-strategy simple \
+  --xml-strategy simple \
+  --llm-client ollama \
+  --model llama3.2 \
   --data data/input.json \
   --output output.xml
 
@@ -57,7 +67,7 @@ uv run python -m prompt_xml_strategies.cli test-strategy \
 - **PromptCreationStrategy**: Interface for prompt generation strategies
 - **ResponseCreationStrategy**: Interface for response processing strategies
 - **XmlOutputStrategy**: Interface for XML transformation strategies
-- **OpenWebUIClient/AnthropicClient**: LLM client implementations
+- **OpenWebUIClient/OllamaClient/AnthropicClient**: LLM client implementations
 
 ### Three-Tier Strategy System
 
@@ -137,6 +147,14 @@ uv run python -m prompt_xml_strategies.cli test-strategy \
 
 # Test LLM client connectivity
 uv run python -m prompt_xml_strategies.cli test-llm-client --client openwebui
+
+# Test OLLAMA client connectivity
+uv run python -m prompt_xml_strategies.cli test-llm-client --client ollama
+
+# Test OLLAMA client with custom server
+uv run python -m prompt_xml_strategies.cli test-llm-client \
+  --client ollama \
+  --base-url http://your-ollama-server:11434
 ```
 
 #### Python API
@@ -151,160 +169,66 @@ uv run python your_script.py
 
 ### Testing
 
-The project uses pytest with comprehensive test coverage requirements. All tests are designed to run without external dependencies using mock LLM clients.
+The project uses pytest with comprehensive test coverage requirements:
 
-#### Running All Tests
-
-```bash
-# Run all 276 tests (recommended)
-uv run python -m pytest tests/ -v --no-cov
-
-# Run all tests with coverage report
-uv run python -m pytest tests/ --cov=src
-
-# Run all tests and fail if coverage below 90%
-uv run python -m pytest tests/ --cov=src --cov-fail-under=90
-```
-
-#### Test Structure
-
-The test suite includes comprehensive coverage of all components:
-
-- **Core Framework Tests**: Pipeline orchestration, strategy management, validation
-- **Strategy Tests**: All three tiers (prompt, response, XML output strategies)
-- **LLM Client Tests**: Mock and real client implementations
-- **Strategy Pipeline Tests**: Complete workflow testing including QA pipeline
-- **Schema Validation Tests**: JSON and XSD schema validation
-- **Error Handling Tests**: Comprehensive error scenarios
-
-#### Basic Testing Commands
+#### Basic Testing
 
 ```bash
-# Run all tests with verbose output
-uv run python -m pytest tests/ -v
+# Run all tests
+uv run pytest
 
-# Run tests without coverage (faster)
-uv run python -m pytest tests/ -v --no-cov
+# Run tests with verbose output
+uv run pytest -v
 
 # Run specific test file
-uv run python -m pytest tests/unit/test_simple_strategies.py -v
-
-# Run specific test class
-uv run python -m pytest tests/unit/test_qa_strategy_pipeline.py::TestQAStrategyPipeline -v
+uv run pytest tests/unit/test_simple_strategies.py
 
 # Run specific test method
-uv run python -m pytest tests/unit/test_simple_strategies.py::TestSimplePromptCreationStrategy::test_create_prompt_basic -v
+uv run pytest tests/unit/test_simple_strategies.py::TestSimplePromptCreationStrategy::test_create_prompt_basic
 ```
 
 #### Coverage Testing
 
 ```bash
 # Run tests with coverage report
-uv run python -m pytest tests/ --cov=src
+uv run pytest --cov=src
 
-# Generate HTML coverage report (opens in browser)
-uv run python -m pytest tests/ --cov=src --cov-report=html
-open htmlcov/index.html
+# Generate HTML coverage report
+uv run pytest --cov=src --cov-report=html
 
-# Generate XML coverage report for CI/CD
-uv run python -m pytest tests/ --cov=src --cov-report=xml
+# Generate XML coverage report  
+uv run pytest --cov=src --cov-report=xml
 
-# Coverage with detailed line-by-line report
-uv run python -m pytest tests/ --cov=src --cov-report=term-missing
+# Fail if coverage below 90% (as configured in pyproject.toml)
+uv run pytest --cov=src --cov-fail-under=90
 ```
 
 #### Test Categories
 
+Use pytest markers to run specific test categories:
+
 ```bash
 # Run only unit tests
-uv run python -m pytest tests/unit/ -v
+uv run pytest -m unit
 
-# Run only integration tests (if any)
-uv run python -m pytest tests/integration/ -v
+# Run only integration tests  
+uv run pytest -m integration
 
 # Run tests that don't require network access
-uv run python -m pytest tests/ -m "not network" -v
+uv run pytest -m "not network"
 
 # Run fast tests only (exclude slow tests)
-uv run python -m pytest tests/ -m "not slow" -v
-```
-
-#### Strategy-Specific Testing
-
-```bash
-# Test all prompt strategies
-uv run python -m pytest tests/unit/test_*prompt_strategy.py -v
-
-# Test all response strategies  
-uv run python -m pytest tests/unit/test_*response_strategy.py -v
-
-# Test all XML output strategies
-uv run python -m pytest tests/unit/test_*xml_output_strategy.py -v
-
-# Test strategy pipelines
-uv run python -m pytest tests/unit/test_*strategy_pipeline.py -v
-
-# Test QA workflow specifically
-uv run python -m pytest tests/unit/test_qa_*.py -v
+uv run pytest -m "not slow"
 ```
 
 #### Parallel Testing
 
 ```bash
 # Run tests in parallel using pytest-xdist
-uv run python -m pytest tests/ -n auto -v
+uv run pytest -n auto
 
 # Run tests on 4 CPU cores
-uv run python -m pytest tests/ -n 4 -v
-
-# Parallel testing with coverage
-uv run python -m pytest tests/ -n auto --cov=src
-```
-
-#### Demo Application Testing
-
-```bash
-# Run all demo applications
-cd src/test_app
-uv run demo-runner
-
-# Run specific demos
-echo "1" | uv run demo-runner  # Mock demo
-echo "7" | uv run demo-runner  # QA strategy pipeline demo
-echo "8" | uv run demo-runner  # All demos
-
-# Run individual demo scripts
-uv run python mock_demo.py
-uv run python qa_strategy_pipeline_demo.py
-```
-
-#### Continuous Integration Testing
-
-```bash
-# Full CI test suite (what runs in CI/CD)
-uv run python -m pytest tests/ -v --cov=src --cov-fail-under=90 --tb=short
-
-# Quick smoke test (for development)
-uv run python -m pytest tests/unit/test_simple_strategies.py -v
-
-# Test specific new features
-uv run python -m pytest tests/unit/test_qa_strategy_pipeline.py -v
-```
-
-#### Test Debugging
-
-```bash
-# Run tests with detailed output and stop on first failure
-uv run python -m pytest tests/ -v -x --tb=long
-
-# Run tests with pdb debugger on failure
-uv run python -m pytest tests/ --pdb
-
-# Run tests with print statements visible
-uv run python -m pytest tests/ -s -v
-
-# Run specific failing test with maximum verbosity
-uv run python -m pytest tests/unit/test_specific.py::test_method -vvv --tb=long
+uv run pytest -n 4
 ```
 
 ### Code Quality
@@ -350,6 +274,7 @@ src/prompt_xml_strategies/
 ├── llm_clients/            # LLM provider implementations
 │   ├── base_client.py       # BaseLLMClient interface
 │   ├── openwebui_client.py  # OpenWebUI/Ollama client
+│   ├── ollama_client.py     # Direct OLLAMA API client
 │   ├── anthropic_client.py  # Anthropic Claude client
 │   └── __init__.py
 ├── cli.py                   # Command-line interface
@@ -362,9 +287,10 @@ src/prompt_xml_strategies/
 
 ```python
 from prompt_xml_strategies import (
-    TripleStrategyPipeline, 
+    TripleStrategyPipeline,
     get_global_strategy_manager,
-    OpenWebUIClient
+    OpenWebUIClient,
+    OllamaClient
 )
 
 # Get strategies
@@ -373,8 +299,14 @@ prompt_strategy = manager.get_prompt_strategy("simple")
 response_strategy = manager.get_response_strategy("simple")
 xml_strategy = manager.get_xml_strategy("simple")
 
-# Create LLM client
+# Create LLM client (OpenWebUI)
 llm_client = OpenWebUIClient()
+
+# Or use direct OLLAMA client
+# llm_client = OllamaClient()
+
+# Or use custom OLLAMA server
+# llm_client = OllamaClient(base_url="http://your-server:11434")
 
 # Create pipeline
 pipeline = TripleStrategyPipeline(
@@ -394,6 +326,102 @@ result = pipeline.execute(
 prompt = result["prompt"]
 structured_response = result["structured_response"] 
 xml_output = result["xml_string"]
+```
+
+## OLLAMA Integration
+
+The framework provides comprehensive OLLAMA integration for local LLM deployment. The `OllamaClient` offers direct access to OLLAMA API with rich features.
+
+### Setup OLLAMA Server
+
+```bash
+# Install OLLAMA (macOS/Linux)
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Start OLLAMA server
+ollama serve
+
+# Pull models (in another terminal)
+ollama pull llama3.2
+ollama pull codellama:13b
+ollama pull mistral
+```
+
+### OLLAMA Client Features
+
+- **Text Generation**: Single-shot and streaming responses
+- **Chat Interface**: Conversational interactions with message history
+- **Model Management**: Pull, delete, copy, and inspect models
+- **Embeddings**: Generate text embeddings
+- **Advanced Parameters**: Full control over generation (temperature, top_p, seed, etc.)
+- **Remote Servers**: Connect to any OLLAMA server via base URL
+
+### Usage Examples
+
+#### CLI with OLLAMA
+
+```bash
+# Execute pipeline with local OLLAMA
+uv run python -m prompt_xml_strategies.cli execute-pipeline \
+  --llm-client ollama \
+  --model llama3.2 \
+  --data data/input.json \
+  --output output.xml
+
+# Connect to remote OLLAMA server
+uv run python -m prompt_xml_strategies.cli execute-pipeline \
+  --llm-client ollama \
+  --base-url http://192.168.1.100:11434 \
+  --model codellama:13b \
+  --data data/code_task.json \
+  --output results.xml
+
+# Test OLLAMA connectivity and list models
+uv run python -m prompt_xml_strategies.cli test-llm-client --client ollama
+```
+
+#### Python API with OLLAMA
+
+```python
+from prompt_xml_strategies import OllamaClient, TripleStrategyPipeline
+
+# Create OLLAMA client
+ollama_client = OllamaClient()
+
+# Or connect to remote server
+# ollama_client = OllamaClient(base_url="http://your-server:11434")
+
+# Use in pipeline
+pipeline = TripleStrategyPipeline(
+    prompt_strategy=prompt_strategy,
+    response_strategy=response_strategy,
+    xml_strategy=xml_strategy,
+    llm_client=ollama_client
+)
+
+# Execute with specific model
+result = pipeline.execute(
+    input_data={"task": "Generate a report"},
+    model="llama3.2"
+)
+```
+
+### Model Management
+
+The OLLAMA client provides extensive model management capabilities:
+
+```python
+# List available models
+models = ollama_client.get_available_models()
+
+# Get model information
+info = ollama_client.get_model_info("llama3.2")
+
+# Pull a new model
+ollama_client.pull_model("mistral:7b")
+
+# Generate embeddings
+embeddings = ollama_client.embeddings("Text to embed", model="nomic-embed-text")
 ```
 
 ### CLI Usage
@@ -424,4 +452,3 @@ uv run python -m prompt_xml_strategies.cli execute-pipeline \
 3. Use Black for code formatting
 4. Add type hints for all functions
 5. Update documentation when adding new strategies
-

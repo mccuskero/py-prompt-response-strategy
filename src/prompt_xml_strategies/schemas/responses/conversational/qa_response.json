@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://prompt-xml-strategies.dev/schemas/responses/conversational/qa-response.json",
+  "title": "Conversational Q&A Response Schema",
+  "description": "Schema for structured responses to conversational questions",
+  "type": "object",
+  "properties": {
+    "answer": {
+      "type": "string",
+      "description": "The main answer to the question",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Confidence level in the answer (0-1)",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "sources": {
+      "type": "array",
+      "description": "Sources or references for the answer",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "type": {"type": "string", "enum": ["web", "book", "paper", "documentation"]}
+        },
+        "required": ["title"]
+      }
+    },
+    "follow_up_questions": {
+      "type": "array",
+      "description": "Suggested follow-up questions",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Detailed explanation or reasoning"
+    },
+    "examples": {
+      "type": "array",
+      "description": "Examples to illustrate the answer",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {"type": "string"},
+          "code": {"type": "string"},
+          "output": {"type": "string"}
+        },
+        "required": ["description"]
+      }
+    },
+    "difficulty_level": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "advanced"],
+      "description": "Complexity level of the answer"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Topic tags for categorization",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["answer"],
+  "additionalProperties": false
+}

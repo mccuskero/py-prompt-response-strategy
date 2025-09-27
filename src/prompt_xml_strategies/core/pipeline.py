@@ -4,15 +4,15 @@ from typing import Dict, Any, Optional
 from xml.etree.ElementTree import Element, tostring
 import logging
 
-from .strategy_pipeline import AbstractStrategyPipeline
-from .exceptions import ValidationError, PipelineError
+from .base_strategy_pipeline import BaseStrategyPipeline
 from ..prompt_strategies.interface import PromptCreationStrategy
 from ..response_strategies.interface import ResponseCreationStrategy
 from ..xml_output_strategies.interface import XmlOutputStrategy
 from ..llm_clients.base_client import BaseLLMClient
+from .exceptions import PipelineError, ValidationError
 
 
-class TripleStrategyPipeline(AbstractStrategyPipeline):
+class TripleStrategyPipeline(BaseStrategyPipeline):
     """Pipeline that orchestrates prompt creation, response processing, and XML output.
     
     This is a simple implementation of the BaseStrategyPipeline that provides
@@ -38,6 +38,55 @@ class TripleStrategyPipeline(AbstractStrategyPipeline):
             logger: Optional logger for pipeline operations
         """
         super().__init__(prompt_strategy, response_strategy, xml_strategy, llm_client, logger)
+
+    def _execute_prompt_stage(self, input_data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> str:
+        """Execute the prompt generation stage.
+
+        Args:
+            input_data: Input data for prompt generation
+            context: Optional context information
+
+        Returns:
+            Generated prompt string
+        """
+        return self.prompt_strategy.create_prompt(input_data, context)
+
+    def _execute_llm_stage(self, prompt: str, model: str, **kwargs) -> str:
+        """Execute the LLM response stage.
+
+        Args:
+            prompt: Generated prompt
+            model: LLM model to use
+            **kwargs: Additional LLM parameters
+
+        Returns:
+            Raw LLM response
+        """
+        return self.llm_client.generate_response(prompt, model=model, **kwargs)
+
+    def _execute_response_stage(self, raw_response: str, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Execute the response processing stage.
+
+        Args:
+            raw_response: Raw LLM response
+            context: Optional context information
+
+        Returns:
+            Structured response data
+        """
+        return self.response_strategy.process_response(raw_response, context)
+
+    def _execute_xml_stage(self, structured_response: Dict[str, Any], context: Optional[Dict[str, Any]]) -> Element:
+        """Execute the XML generation stage.
+
+        Args:
+            structured_response: Processed response data
+            context: Optional context information
+
+        Returns:
+            XML Element
+        """
+        return self.xml_strategy.transform_to_xml(structured_response, context)
     
     def execute(
         self,
@@ -62,16 +111,16 @@ class TripleStrategyPipeline(AbstractStrategyPipeline):
         """
         try:
             # Stage 1: Create prompt
-            prompt = self.prompt_strategy.create_prompt(input_data, context)
-            
+            prompt = self._execute_prompt_stage(input_data, context)
+
             # Stage 2: Generate LLM response
-            raw_response = self.llm_client.generate_response(prompt, model=model, **llm_kwargs)
-            
+            raw_response = self._execute_llm_stage(prompt, model, **llm_kwargs)
+
             # Stage 3: Process response
-            structured_response = self.response_strategy.process_response(raw_response, context)
-            
+            structured_response = self._execute_response_stage(raw_response, context)
+
             # Stage 4: Transform to XML
-            xml_element = self.xml_strategy.transform_to_xml(structured_response, context)
+            xml_element = self._execute_xml_stage(structured_response, context)
             
             # Return all results
             return {
@@ -180,54 +229,3 @@ class TripleStrategyPipeline(AbstractStrategyPipeline):
             XML Element
         """
         return self.xml_strategy.transform_to_xml(response_data, context)
-    
-    # Implementation of abstract methods from AbstractStrategyPipeline
-    
-    def _execute_prompt_stage(self, input_data: Dict[str, Any], context: Optional[Dict[str, Any]]) -> str:
-        """Execute the prompt generation stage.
-        
-        Args:
-            input_data: Input data for prompt generation
-            context: Optional context information
-            
-        Returns:
-            Generated prompt string
-        """
-        return self.prompt_strategy.create_prompt(input_data, context)
-    
-    def _execute_llm_stage(self, prompt: str, model: str, **kwargs) -> str:
-        """Execute the LLM response stage.
-        
-        Args:
-            prompt: Generated prompt
-            model: Model to use
-            **kwargs: Additional LLM parameters
-            
-        Returns:
-            Raw LLM response
-        """
-        return self.llm_client.generate_response(prompt, model=model, **kwargs)
-    
-    def _execute_response_stage(self, raw_response: str, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        """Execute the response processing stage.
-        
-        Args:
-            raw_response: Raw LLM response
-            context: Optional context information
-            
-        Returns:
-            Structured response data
-        """
-        return self.response_strategy.process_response(raw_response, context)
-    
-    def _execute_xml_stage(self, structured_response: Dict[str, Any], context: Optional[Dict[str, Any]]) -> Element:
-        """Execute the XML generation stage.
-        
-        Args:
-            structured_response: Processed response data
-            context: Optional context information
-            
-        Returns:
-            Generated XML element
-        """
-        return self.xml_strategy.transform_to_xml(structured_response, context)

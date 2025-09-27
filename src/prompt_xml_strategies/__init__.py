@@ -10,8 +10,6 @@ __author__ = "PromptXML Team"
 __email__ = "team@promptxml.dev"
 
 from .core.pipeline import TripleStrategyPipeline
-from .core.strategy_pipeline import StrategyPipeline, AbstractStrategyPipeline
-from .strategy_pipelines import SampleStrategyPipeline, QAStrategyPipeline
 from .core.strategy_manager import StrategyManager, get_global_strategy_manager
 from .core.exceptions import ValidationError, PipelineError, StrategyError
 
@@ -21,9 +19,9 @@ from .response_strategies.interface import ResponseCreationStrategy
 from .xml_output_strategies.interface import XmlOutputStrategy
 
 # Default implementations
-from .prompt_strategies import SimplePromptCreationStrategy, QAPromptStrategy
-from .response_strategies import SimpleResponseCreationStrategy, QAResponseStrategy
-from .xml_output_strategies import SimpleXmlOutputStrategy, QAXmlOutputStrategy
+from .prompt_strategies import SimplePromptCreationStrategy
+from .response_strategies import SimpleResponseCreationStrategy
+from .xml_output_strategies import SimpleXmlOutputStrategy
 
 # LLM clients
 from .llm_clients.base_client import BaseLLMClient, LLMError
@@ -33,10 +31,6 @@ from .llm_clients.anthropic_client import AnthropicClient
 __all__ = [
     # Core components
     "TripleStrategyPipeline",
-    "StrategyPipeline",
-    "AbstractStrategyPipeline", 
-    "SampleStrategyPipeline",
-    "QAStrategyPipeline",
     "StrategyManager",
     "get_global_strategy_manager",
     
@@ -53,11 +47,8 @@ __all__ = [
     
     # Default implementations
     "SimplePromptCreationStrategy",
-    "QAPromptStrategy",
     "SimpleResponseCreationStrategy",
-    "QAResponseStrategy",
     "SimpleXmlOutputStrategy",
-    "QAXmlOutputStrategy",
     
     # LLM clients
     "BaseLLMClient",

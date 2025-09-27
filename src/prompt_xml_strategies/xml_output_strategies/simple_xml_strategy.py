@@ -3,7 +3,6 @@
 from typing import Dict, Any, Optional
 from xml.etree.ElementTree import Element, SubElement
 import datetime
-import re
 
 from .interface import XmlOutputStrategy
 from ..core.exceptions import ValidationError
@@ -96,10 +95,9 @@ class SimpleXmlOutputStrategy(XmlOutputStrategy):
         Returns:
             Cleaned element name
         """
-        # First convert to string and replace hyphens
-        cleaned = str(name).replace('-', '_')
-        # Then replace other invalid characters
-        cleaned = re.sub(r'[^a-zA-Z0-9_]', '_', cleaned)
+        # Replace invalid characters with underscores
+        import re
+        cleaned = re.sub(r'[^a-zA-Z0-9_-]', '_', str(name))
         
         # Ensure it starts with a letter or underscore
         if cleaned and not cleaned[0].isalpha() and cleaned[0] != '_':

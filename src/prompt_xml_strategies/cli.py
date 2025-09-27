@@ -15,6 +15,7 @@ from .core.strategy_manager import get_global_strategy_manager
 from .core.pipeline import TripleStrategyPipeline
 from .llm_clients.openwebui_client import OpenWebUIClient
 from .llm_clients.anthropic_client import AnthropicClient
+from .llm_clients.ollama_client import OllamaClient
 from .core.exceptions import ValidationError, PipelineError
 
 
@@ -82,9 +83,9 @@ def list_strategies() -> None:
 @click.option("--prompt-strategy", "-p", default="simple", help="Prompt creation strategy")
 @click.option("--response-strategy", "-r", default="simple", help="Response processing strategy")
 @click.option("--xml-strategy", "-x", default="simple", help="XML output strategy")
-@click.option("--llm-client", "-c", type=click.Choice(["openwebui", "anthropic"]), 
+@click.option("--llm-client", "-c", type=click.Choice(["openwebui", "anthropic", "ollama"]),
               default="openwebui", help="LLM client to use")
-@click.option("--base-url", help="Base URL for OpenWebUI (default: http://localhost:11434)")
+@click.option("--base-url", help="Base URL for OpenWebUI/OLLAMA (default: http://localhost:11434)")
 @click.option("--api-key", help="API key for the LLM client")
 @click.option("--model", "-m", help="Model to use")
 @click.option("--data", "-d", type=click.Path(exists=True, path_type=Path), required=True,
@@ -138,6 +139,12 @@ def execute_pipeline(
                 sys.exit(1)
             client = AnthropicClient(api_key=api_key)
             default_model = model or "claude-3-sonnet-20240229"
+        elif llm_client == "ollama":
+            client = OllamaClient(
+                api_key=api_key,
+                base_url=base_url or "http://localhost:11434"
+            )
+            default_model = model or "llama3.2"
         
         # Create pipeline
         pipeline = TripleStrategyPipeline(
@@ -308,9 +315,9 @@ def strategy_info(strategy: str, type: str) -> None:
 
 
 @main.command()
-@click.option("--client", "-c", type=click.Choice(["openwebui", "anthropic"]), 
+@click.option("--client", "-c", type=click.Choice(["openwebui", "anthropic", "ollama"]),
               required=True, help="LLM client type")
-@click.option("--base-url", help="Base URL for OpenWebUI")
+@click.option("--base-url", help="Base URL for OpenWebUI/OLLAMA (default: http://localhost:11434)")
 @click.option("--api-key", help="API key for the client")
 def test_llm_client(client: str, base_url: Optional[str], api_key: Optional[str]) -> None:
     """Test LLM client connection and capabilities."""
@@ -325,6 +332,11 @@ def test_llm_client(client: str, base_url: Optional[str], api_key: Optional[str]
                 console.print("[red]✗[/red] API key required for Anthropic client")
                 sys.exit(1)
             llm_client = AnthropicClient(api_key=api_key)
+        elif client == "ollama":
+            llm_client = OllamaClient(
+                api_key=api_key,
+                base_url=base_url or "http://localhost:11434"
+            )
         
         # Test connection
         console.print("[yellow]⏳[/yellow] Testing connection...")

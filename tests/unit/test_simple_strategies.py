@@ -202,6 +202,9 @@ class TestSimpleXmlOutputStrategy:
         cleaned = self.strategy._clean_element_name("123abc")
         assert cleaned == "_123abc"
         
+        # Test empty name
+        cleaned = self.strategy._clean_element_name("")
+        assert cleaned == "element"
     
     def test_validate_xml_success(self):
         """Test successful XML validation."""
